@@ -1,0 +1,24 @@
+.venv/
+__pycache__/
+*.pyc
+leptospirosis_project/results/*.joblib
+tmp/
+leptospirosis_project/results.zip
+
+# Raw patient data and historical patient-containing bundles remain local.
+Leptospirosis clinical data.csv
+leptospirosis_project/results/
+*.joblib
+!artifacts/model.joblib
+
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+.ipynb_checkpoints/
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+.DS_Store
+Thumbs.db

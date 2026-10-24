@@ -1,0 +1,12 @@
+* text=auto
+*.py text eol=lf
+*.md text eol=lf
+*.ipynb text eol=lf
+*.yml text eol=lf
+requirements*.txt text eol=lf
+
+# Release integrity checks exact bytes across Windows and Linux.
+artifacts/** -text whitespace=cr-at-eol
+reports/** -text whitespace=cr-at-eol
+*.png binary
+*.pdf binary

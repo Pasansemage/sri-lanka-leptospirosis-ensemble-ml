@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-10-24T16:07:41.854944+00:00",
+  "model": "Extra trees",
+  "feature_set": "base",
+  "source_data_sha256": "8f15e42cf808f6c342b868995633eedac86a7648cc73f553c852191424e7e880",
+  "seed": 42,
+  "python": "3.12.14",
+  "packages": {
+    "numpy": "2.5.3",
+    "pandas": "3.0.6",
+    "scikit-learn": "1.9.1",
+    "scipy": "1.18.1",
+    "joblib": "1.6.0",
+    "xgboost": "3.4.1",
+    "lightgbm": "4.7.0",
+    "catboost": "1.2.10",
+    "streamlit": "1.65.0"
+  },
+  "code_sha256": {
+    "train.py": "2e63547641b8e3ca70a2e8356ba8b02d0355e73669e0fc148aa3b8d75fa3b33f",
+    "src/__init__.py": "5200f8c06ce49e7041be51167ff7a6001184f28e8cd7080ba1d4b9f9a14efc13",
+    "src/data.py": "602621ead6b59cc25430b5fdc9a9aeb63b3a966ef5e5e7e72f21572ece445d7c",
+    "src/explain.py": "b618512854c9e507a55b61b33232784e81845277a29c1e0b0e0a447fd0488e16",
+    "src/models.py": "29030e54bc75f7fe31c68d8e6dd9c63a41971f78e844645daf523d5a98bf4b92",
+    "src/runtime.py": "e2fab7bd1c18359d075782504e411918880d4643b7770660e4087f0ebf2cc6e9",
+    "requirements.txt": "f96615485a61f219256b934a9e7cbf09fe5eec2014f9d8892c9171570a0576be"
+  },
+  "artifacts": {
+    "artifacts/model.joblib": "503bc9aeb6f8f1e4482054012105a42d51f038adbb5f7f20c2d655eebe5731c0",
+    "artifacts/reference.json": "6c3e7272d177443026f9f3e4f54097af5e4610215b3b6785ac64053d7a957b23"
+  },
+  "report_sha256": {
+    "reports/comparison.png": "33df2e00a4d4378ea6b1f54014b0edd3adc1da556ed4ba641b4271a0bdd29fbe",
+    "reports/curves.json": "cac0620f8343710088a9abdf3e764c9e87fd281d80371de4523edf12b4b256dd",
+    "reports/cv_candidates.csv": "c97d82b1c2e42919cb8e714f7ad9d24bef478da5f3199e4c6edd6042c32afb2d",
+    "reports/cv_folds.csv": "5613e3a5df85d132856dd55884014e4126cee274ac4527697d3376e3e9fd2f17",
+    "reports/cv_leaderboard.csv": "016b14da8214ea035902083cf2ca5b8547341e3ea346b1eaa0809099c8c98ec7",
+    "reports/evaluation.png": "d6041bbe5c8d2eb745606534d4acb514e8c07edeeb71f50ec29a993174ba95aa",
+    "reports/explainability.json": "1fb4370bb3fbfd2bca507c23795d4e7c319f15e5eaaa2c1e3c544b97e87bc9ea",
+    "reports/feature_ablation.csv": "f030a008fdf3da1122845e0206103c8cd77682889cd61baaf85146c7ecdc3016",
+    "reports/feature_audit.csv": "91ecbe84e90712bbd41ee1cda1320cd8b9a8ba242f0d59944baf3cc5b928a96a",
+    "reports/FEATURE_ENGINEERING.md": "873558c6bdcedbe9a1b8029271182e7b0de9c9cab16af20ee031f616e50d286e",
+    "reports/importance.png": "af4907714672cc83c1feb41646bd3747836c4aad5dfee5050dd2c95db288a4ac",
+    "reports/MODEL_CARD.md": "39f517ee2f3c93ddb6432d987c64910f9cf6a5f21069d4c1db97ef12e1e62bfc",
+    "reports/permutation_importance.csv": "724c8748de086900f67314867b5d422dfa769ac0410fa1ef3c6c325b8a714052",
+    "reports/selection.json": "658153e6e1d2020505919161d5b3271a9987d64adebb8b130b6179ad66f834e4",
+    "reports/synthetic_age_response.csv": "7fc454c4d36398675d6fb3209aecd49b4be36f1bdb1fdcd3d1550c85589869dc",
+    "reports/synthetic_local_explanation.csv": "ce826488ea08c996511b38ea29f450402e9e462138c2e532ebe63abcc825a18e",
+    "reports/test_results.json": "1468ae13235501e89350a586b9d7d6951f23db58d6a00f1aa82f7243fc2fbef3"
+  },
+  "elapsed_seconds": 15.835994099994423,
+  "notice": "Research demonstration only. Final code 1 and code 2 have unverified clinical meanings. The 99 missing-value convention and measurement units are provisional. Scores are uncalibrated model outputs, not clinical risks.",
+  "model_version": "503bc9aeb6f8"
+}
