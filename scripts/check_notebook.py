@@ -1,7 +1,8 @@
-"""Execute the notebook's plain-Python cells in one IPython session and retain outputs.
+"""Validate or execute the notebook's plain-Python cells in one IPython session.
 
 This in-process check needs no separate Jupyter kernel or connection files.
 It intentionally supports this notebook's ordinary Python cells, not kernel magics.
+Generated outputs are saved only when --save-outputs is explicitly requested.
 """
 from pathlib import Path
 import os
