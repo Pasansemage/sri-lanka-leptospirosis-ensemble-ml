@@ -38,6 +38,12 @@ Training writes only local generated files under ignored `outputs/`:
 
 Use `--output /another/local/directory` to change the destination; set `OUTPUT_DIR` in the notebook to the same directory. After a reporting interruption, `python train.py --data /path/to/file.csv --finalize` verifies the existing source/model metrics and rebuilds explanations without rerunning selection. For an ordinary new experiment, use a full training run.
 
+## Notebook setup in VS Code
+
+Select the repository's `.venv/Scripts/python.exe` with **Select Kernel**, then restart the kernel and choose **Run All**. The setup cell finds the project from `notebooks/`, the repository root, `ML Assignment`, or the broader `Applied ML` workspace. It prints the resolved project folder and Python executable so you can check which environment is in use.
+
+If the kernel starts somewhere unrelated, set `PROJECT_DIR` in the first code cell to your research repository path. `RUN_TRAINING = False` reads existing local `outputs/`; for a fresh clone, first run the training command above using your separately obtained dataset.
+
 ## Methodology and interpretation
 
 The benchmark declares **36 recipes across 13 methods**, two feature representations and shared five-fold development splits. It includes bagged trees, random forest, Extra Trees, six boosting methods, two stacking recipes, logistic regression and a prior baseline. Stacking fits complete preprocessing pipelines inside three inner folds.
