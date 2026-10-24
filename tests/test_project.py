@@ -1,10 +1,9 @@
-"""Material checks for serving parity, leakage boundaries, release integrity, and app behaviour."""
+"""Synthetic-data contract checks and optional checks on locally trained research outputs."""
 import json
 import unittest
 import numpy as np
 import pandas as pd
-from sklearn.base import clone
-from src.data import FEATURES, NUMERIC, SYMPTOMS, ROOT, AdmissionFeatures, validate_record
+from src.data import FEATURES, NUMERIC, SYMPTOMS, OUTPUT, AdmissionFeatures, validate_record
 from src.models import pipeline, candidates
 from sklearn.linear_model import LogisticRegression
 from src.runtime import load_release
@@ -46,14 +45,37 @@ class ContractTests(unittest.TestCase):
                 self.assertEqual(list(base.named_steps), ['features','prepare','model'])
                 self.assertFalse(hasattr(base.named_steps['prepare'], 'transformers_'))
 
+    def test_explanation_reconstructs_synthetic_prediction(self):
+        records = pd.concat([validate_record({'Age':25 + i, 'PRad':65 + i, 'Feverad':1 if i % 2 else 2})
+                             for i in range(12)], ignore_index=True)
+        model = pipeline(LogisticRegression(), False).fit(records, [0,1] * 6)
+        reference = {c: float(records[c].median()) if c in NUMERIC and records[c].notna().any() else None
+                     for c in FEATURES}
+        base, prediction, local = local_shapley(model, records.iloc[[3]], reference, permutations=3)
+        self.assertTrue(np.isfinite(prediction))
+        self.assertAlmostEqual(base + local.contribution.sum(), prediction)
+        self.assertAlmostEqual(prediction, model.predict_proba(records.iloc[[3]])[0,1])
+
+    def test_selection_ignores_test_scores_and_uses_declared_ties(self):
+        from train import ranked
+        rows = pd.DataFrame([
+            dict(model='A', feature_set='base', candidate=0, mean_roc_auc=.60, mean_average_precision=.9, test_auc=.99),
+            dict(model='B', feature_set='base', candidate=0, mean_roc_auc=.70, mean_average_precision=.5, test_auc=.50),
+            dict(model='C', feature_set='base', candidate=0, mean_roc_auc=.70, mean_average_precision=.6, test_auc=.40),
+        ])
+        self.assertEqual(ranked(rows).model.tolist(), ['C','B','A'])
+        rows['test_auc'] = [0, 1, 1]
+        self.assertEqual(ranked(rows).model.tolist(), ['C','B','A'])
+
+@unittest.skipUnless((OUTPUT / 'artifacts/manifest.json').is_file(), 'Run training locally to validate generated outputs.')
 class ReleaseTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls): cls.model, cls.reference, cls.manifest = load_release()
 
     def test_selection_uses_development_only(self):
         from train import ranked
-        frame = ranked(pd.read_csv(ROOT / 'reports/cv_candidates.csv'))
-        selected = json.loads((ROOT / 'reports/selection.json').read_text())
+        frame = ranked(pd.read_csv(OUTPUT / 'reports/cv_candidates.csv'))
+        selected = json.loads((OUTPUT / 'reports/selection.json').read_text())
         self.assertFalse(selected['test_used_for_selection'])
         self.assertEqual(int(frame.iloc[0].spec_id), selected['spec_id'])
         self.assertEqual(frame.iloc[0].model, selected['selected_model'])
@@ -74,18 +96,5 @@ class ReleaseTests(unittest.TestCase):
         self.assertNotIsInstance(self.model, dict)
         self.assertFalse(hasattr(self.model, 'X_train'))
         self.assertEqual(len(self.reference), len(FEATURES))
-
-    def test_streamlit_inference_and_explanation(self):
-        from streamlit.testing.v1 import AppTest
-        app = AppTest.from_file(str(ROOT / 'app.py'), default_timeout=120).run()
-        self.assertFalse(app.exception, str(app.exception))
-        next(b for b in app.button if b.label == 'Run inference').click().run()
-        self.assertFalse(app.exception, str(app.exception))
-        self.assertIn('prediction', app.session_state)
-        next(b for b in app.button if b.label == 'Explain this prediction').click().run()
-        self.assertFalse(app.exception, str(app.exception))
-        self.assertIn('local_explanation', app.session_state)
-        next(s for s in app.slider if s.label == 'Illustrative inference threshold').set_value(.75).run()
-        self.assertFalse(app.exception, str(app.exception))
 
 if __name__ == '__main__': unittest.main(verbosity=2)

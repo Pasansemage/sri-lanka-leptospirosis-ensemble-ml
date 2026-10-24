@@ -1,11 +1,11 @@
-"""Minimal serving loader with model/report integrity and package compatibility checks."""
+"""Load locally generated research results with integrity and compatibility checks."""
 import importlib.metadata
 import json
 from pathlib import Path
 import joblib
-from .data import ROOT, sha256
+from .data import OUTPUT, sha256
 
-def load_release(root=ROOT):
+def load_release(root=OUTPUT):
     root = Path(root)
     manifest = json.loads((root / 'artifacts/manifest.json').read_text(encoding='utf-8'))
     for name, expected in {**manifest['artifacts'], **manifest['report_sha256']}.items():

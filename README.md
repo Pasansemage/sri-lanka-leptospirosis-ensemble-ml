@@ -1,101 +1,67 @@
-# Sri Lanka Leptospirosis — Ensemble ML
+# Sri Lanka Leptospirosis - Ensemble ML Research
 
-A reproducible comparison of bagging, boosting and stacking on admission features from a Sri Lankan febrile-patient study, with an interactive Streamlit app and explanations of the selected model.
+Reproducible comparison of bagging, boosting and stacking using admission features from a Sri Lankan febrile-patient study. This repository contains the research code, an output-free modelling notebook, methodology notes and tests. Patient data, fitted models, generated results, presentations and the demo application are not distributed here.
 
-**Research demonstration only.** Source outcome codes and missing-value conventions are provisional. Scores are uncalibrated model outputs, not clinical risks. The existing project's historical holdout is reused for internal evaluation; this is not external validation.
+## Data source and access
 
-## Project folder
+**Source:** Suneth Agampodi (2022), *Demographic, exposure, clinical, biochemical and diagnostic data of febrile patients recruited for the largest field study on leptospirosis in Sri Lanka*, Mendeley Data, **version 4**, published 31 May 2022.
 
-The working project is `D:\Masters\Second Semester\Applied ML\sri-lanka-leptospirosis-ensemble-ml`. The earlier `ML Project` folder is preserved as a backup; make future changes here.
+- Dataset and download: [Mendeley Data v4](https://data.mendeley.com/datasets/zmxmp42g9p/4)
+- Dataset DOI: [10.17632/zmxmp42g9p.4](https://doi.org/10.17632/zmxmp42g9p.4)
+- Associated data paper: [10.1016/j.dib.2022.108378](https://doi.org/10.1016/j.dib.2022.108378)
+- Publisher-listed data licence: CC BY 4.0. Cite the original dataset and follow its terms when conducting your research.
 
-## Start here
+**No patient data is committed or redistributed.** Obtain the dataset directly from the source and keep your copy outside the repository. Supply its path with `--data`; there is no automatic download or upload. An optional local `data/` folder is also ignored by Git.
 
-- [`leptospirosis_project/modelling.ipynb`](leptospirosis_project/modelling.ipynb): feature reasoning, ensemble comparison, selection metrics, explainability and MLOps.
-- [`reports/FEATURE_ENGINEERING.md`](reports/FEATURE_ENGINEERING.md): exact decisions, assumptions and ablation design.
-- [`reports/MODEL_CARD.md`](reports/MODEL_CARD.md): measured results and limitations.
-- [`PRESENTATION_SCRIPT.md`](PRESENTATION_SCRIPT.md): a spoken demonstration script using the actual results.
-- [`DEPLOYMENT.md`](DEPLOYMENT.md): free public hosting and release/rollback instructions.
-- `leptospirosis_project/analysis.ipynb`: earlier broader course analysis, retained with outputs cleared. Its original `results.zip` stays local.
+The recorded experiment used a CSV named `Leptospirosis clinical data.csv` with SHA-256 `8f15e42cf808f6c342b868995633eedac86a7648cc73f553c852191424e7e880`. This identifies the local experiment input; its equality to a publisher download has not been independently verified. A different file/version can produce different results. Required columns are `Serial`, `Final` and the predictors explicitly listed in [src/data.py](src/data.py).
 
-## Results
+## Reproduce the experiment
 
-The benchmark evaluates **36 model/feature/hyperparameter combinations** across **13 methods**, with the same five development folds. Methods include three bagging methods (bagged trees, random forest, Extra Trees), six boosting methods (AdaBoost, gradient boosting, histogram boosting, XGBoost, LightGBM, CatBoost), two stacking recipes, logistic regression and a prior baseline. Stacking uses three inner folds, with preprocessing inside each base pipeline.
+Use **Python 3.12**. Install the pinned research dependencies in an isolated environment:
 
-**Extra Trees with the base features** wins by mean development ROC AUC **0.6054**, with fold SD **0.0500**. The engineered representation scores **0.6000** for Extra Trees, so the derived inputs are excluded from the deployed predictor. Exact AUC ties use development average precision and then deterministic ordering; test scores never choose the winner.
-
-| Internal holdout metric | Selected model | Prior baseline |
-|---|---:|---:|
-| ROC AUC | 0.6612 | 0.5000 |
-| Average precision | 0.5335 | 0.3884 |
-| Accuracy | 0.6322 | 0.6116 |
-| Balanced accuracy | 0.5538 | 0.5000 |
-| Precision, code 1 | 0.5758 | 0.0000 |
-| Recall, code 1 | 0.2021 | 0.0000 |
-| F1, code 1 | 0.2992 | 0.0000 |
-| Brier score (lower is better) | 0.2212 | 0.2376 |
-| Log loss (lower is better) | 0.6342 | 0.6680 |
-
-The fixed threshold is 0.50. Low code-1 recall is a material limitation. The fixed-model bootstrap ROC AUC interval is approximately **0.5902–0.7313**; it does not include model-selection uncertainty. The source has 1,734 records; 1,206 meet the provisional cohort contract, with 964 development and 242 holdout records.
-
-## Run the app
-
-Use Python **3.12** and the exact versions in `requirements.txt` to load the saved model. The app works without the source CSV and does not retrain on startup.
-
-```powershell
+```sh
 python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\run_dashboard.ps1
-```
-
-Or, from an activated environment:
-
-```sh
-python -m streamlit run app.py
-```
-
-The app includes immediate hypothetical-record inference, original-feature explanations, development comparisons, held-out metrics/confusion matrix, reliability plots, feature ablation and release provenance. Application code does not persist or log submitted inputs. Use hypothetical inputs.
-
-## Reproduce training
-
-Obtain the dataset separately and place `Leptospirosis clinical data.csv` at the repository root. It is ignored by Git. Its recorded SHA-256 is `8f15e42cf808f6c342b868995633eedac86a7648cc73f553c852191424e7e880`.
-
-```sh
-python train.py
+# Linux/macOS: source .venv/bin/activate
+# Windows PowerShell: .\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements-dev.txt
+python train.py --data "/path/to/Leptospirosis clinical data.csv"
 python -m unittest discover -s tests -v
+python scripts/check_notebook.py
 ```
 
-Training fits all candidates, freezes the development-selected recipe, evaluates only the winner and prior baseline on the holdout, computes explanations, and exports `artifacts/` and aggregate `reports/`. It can take several minutes. `python train.py --finalize` resumes report generation for an already evaluated local artifact after source/metric parity checks, without rerunning selection.
+Open [notebooks/modelling.ipynb](notebooks/modelling.ipynb) with the same environment. First run the training command above, or set `DATA_PATH` to your local CSV and `RUN_TRAINING = True` in the notebook. Training is explicit; no source data or fitted model is needed to inspect the notebook or run the synthetic-data checks.
 
-For the notebook, install `requirements-dev.txt` and select the same environment. Its saved-results path works without the CSV; retraining is explicit and disabled by default.
+Training writes only local generated files under ignored `outputs/`:
 
-## Release checks
+- `outputs/reports/`: all candidate/fold results, feature ablation, frozen selection, holdout metrics, plots, permutation importance and synthetic explanations.
+- `outputs/artifacts/`: fitted estimator, synthetic reference and manifest containing source, package, dataset and output checksums.
+
+Use `--output /another/local/directory` to change the destination; set `OUTPUT_DIR` in the notebook to the same directory. After a reporting interruption, `python train.py --data /path/to/file.csv --finalize` verifies the existing source/model metrics and rebuilds explanations without rerunning selection. For an ordinary new experiment, use a full training run.
+
+## Methodology and interpretation
+
+The benchmark declares **36 recipes across 13 methods**, two feature representations and shared five-fold development splits. It includes bagged trees, random forest, Extra Trees, six boosting methods, two stacking recipes, logistic regression and a prior baseline. Stacking fits complete preprocessing pipelines inside three inner folds.
+
+[Feature engineering](docs/FEATURE_ENGINEERING.md) explains each operation, reason, assumption and leakage boundary. Median imputation, missing indicators and encoders are fitted only on training folds. Four derived inputs are tested through development-only ablation.
+
+Selection maximizes **mean development ROC AUC**. Exact ties use development average precision and deterministic ordering. The internal holdout does not select the model, features or threshold. Evaluation additionally reports average precision, accuracy, balanced accuracy, precision, recall, F1, Brier score, log loss and a confusion matrix at threshold 0.50. Global permutation importance and local Monte Carlo Shapley contributions explain the chosen predictor after selection.
+
+The [historical model card](docs/MODEL_CARD.md) records the original experiment: Extra Trees with base features, development ROC AUC **0.6054**, internal holdout ROC AUC **0.6612**, and recall **0.2021** at 0.50. These are reference results, not guarantees for another run. The historical holdout was used in earlier project work; it is internal evaluation, not independent external validation.
+
+**Research limitations:** numerical source outcome meanings, measurement units and the 99 missing-value convention remain provisional. Do not equate source code 1 with a verified clinical diagnosis. Scores are uncalibrated. Low recall, cohort selection, hospital/time shifts, correlated predictors and selection optimism limit interpretation. Verify the source codebook and obtain independent validation before making stronger substantive claims.
+
+## Extend the research
+
+Change declared models/grids in `src/models.py`, the admission feature contract in `src/data.py`, or explanations in `src/explain.py`. Keep learned preprocessing inside folds and stacking base pipelines. Choose features, hyperparameters and any operating threshold using development data; reserve an independent evaluation set for final assessment. Use a separate output directory for each new experiment and record source version, assumptions and changes alongside the generated manifest.
+
+## Checks without patient data
 
 ```sh
 python -m unittest discover -s tests -v
-python -m compileall -q src app.py train.py
+python scripts/check_notebook.py --validate-only
+python -m compileall -q src train.py
 ```
 
-Checks cover invalid inputs, derived features, fold-local preprocessing, stacking boundaries, development-only selection, release integrity, explanation reconstruction and the interactive prediction/explanation flow. GitHub Actions runs them after publishing; remote CI has not run locally.
+Synthetic-data tests cover input validation, derived-feature handling, preprocessing isolation, stacking boundaries, development-only ranking and explanation reconstruction. Three checks of fitted outputs run after local training and otherwise report as skipped. GitHub Actions runs the data-free checks; it does not fetch or publish the dataset. Notebook execution does not save cell outputs unless `--save-outputs` is explicitly requested; clear all outputs before committing.
 
-`.gitattributes` preserves exact release/report bytes so manifest checks work across Windows and Linux. Checksums detect changes; they do not make arbitrary pickle files trustworthy. Load only the project's own model artifact.
-
-## Publish this local repository
-
-Git is initialized on `main`. Publish this existing folder through GitHub Desktop; the public repository and live hosting are the remaining account-side steps.
-
-Suggested public name: **`sri-lanka-leptospirosis-ensemble-ml`** under **`Pasansemage`**.
-
-In GitHub Desktop choose **File → Add local repository**, select this folder, then **Publish repository**. Set the suggested name and clear **Keep this code private** for a public repo. No remote is configured and no push is performed automatically.
-
-Alternatively, create an empty public repository on GitHub, then run:
-
-```sh
-git remote add origin https://github.com/Pasansemage/sri-lanka-leptospirosis-ensemble-ml.git
-git push -u origin main
-```
-
-## Data attribution and local-only files
-
-Suneth Agampodi (2022), *Demographic, exposure, clinical, biochemical and diagnostic data of febrile patients recruited for the largest field study on leptospirosis in Sri Lanka*, Mendeley Data v4, DOI [10.17632/zmxmp42g9p.4](https://data.mendeley.com/datasets/zmxmp42g9p/4), CC BY 4.0. Data paper: [10.1016/j.dib.2022.108378](https://doi.org/10.1016/j.dib.2022.108378). The local CSV's equality to a publisher download has not been independently verified here.
-
-Raw data, historical patient-containing bundles, temporary files, credentials and the virtual environment stay local. The tracked artifact is the fitted estimator, without the experiment dictionaries containing patient tables. Reference values are synthetic/aggregate; published reports are aggregate or synthetic. Supporting questionnaires are included as supplied and do not replace the CSV codebook. Outcome meanings, units and the 99 convention require verification before substantive clinical interpretation.
+`.gitignore` excludes data formats, fitted models, generated output directories, archives and local environments. Review staged files before publishing, especially when adding new data formats or notebooks.

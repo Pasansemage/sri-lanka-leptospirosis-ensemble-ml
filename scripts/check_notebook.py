@@ -5,6 +5,7 @@ It intentionally supports this notebook's ordinary Python cells, not kernel magi
 """
 from pathlib import Path
 import os
+import argparse
 import nbformat
 import matplotlib
 matplotlib.use('module://matplotlib_inline.backend_inline')
@@ -13,9 +14,20 @@ from IPython.utils.capture import capture_output
 from matplotlib_inline.backend_inline import configure_inline_support
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--validate-only', action='store_true', help='Check notebook structure and Python syntax without data or outputs.')
+    parser.add_argument('--save-outputs', action='store_true', help='Save generated cell outputs locally; clear them before committing.')
+    args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
-    path = root / 'leptospirosis_project/modelling.ipynb'
+    path = root / 'notebooks/modelling.ipynb'
     notebook = nbformat.read(path, as_version=4)
+    nbformat.validate(notebook)
+    if args.validate_only:
+        cells = [cell for cell in notebook.cells if cell.cell_type == 'code']
+        for count, cell in enumerate(cells, 1):
+            compile(cell.source, f'{path.name}:cell-{count}', 'exec')
+        print(f'Validated notebook structure and syntax of {len(cells)} code cells without data.')
+        return
     os.chdir(path.parent)
     shell = InteractiveShell.instance()
     configure_inline_support(shell, 'module://matplotlib_inline.backend_inline')
@@ -36,7 +48,8 @@ def main():
         for output in captured.outputs:
             cell.outputs.append(nbformat.v4.new_output('display_data', data=output.data, metadata=output.metadata))
     nbformat.validate(notebook)
-    nbformat.write(notebook, path)
+    if args.save_outputs:
+        nbformat.write(notebook, path)
     print(f'Executed and validated {count} code cells without errors (in-process IPython).')
 
 if __name__ == '__main__':

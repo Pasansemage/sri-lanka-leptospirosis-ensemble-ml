@@ -21,6 +21,8 @@ The prediction point is admission. Source labels and units remain provisional. T
 | Reject arbitrary feature removal | No whole-dataset correlation/importance screening; no post-test feature dropping | Preserve leakage boundaries and avoid test-driven choices | 54 original inputs with correlated fields can dilute individual importance |
 | Reject synthetic oversampling here | Original class proportions; equal class weights across all new candidates | Moderate code imbalance; consistent objective across ensemble families; avoid creating mixtures of sparse categorical records | ROC AUC alone does not solve imbalance; report AP, class prevalence, recall, precision, F1 and calibration metrics |
 
+Generated comparison tables are written locally under `outputs/reports/`; no patient rows or fitted artifacts are distributed. The static historical outcome is described in `docs/MODEL_CARD.md`.
+
 ## How feature engineering is retained or rejected
 
 Both `base` and `engineered` representations are declared before the new run. They use exactly the same development folds and every estimator refits all learned preprocessing inside its fitting fold. Stacking owns complete base pipelines inside its three inner folds, preventing preprocessing leakage into meta-learner training.

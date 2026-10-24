@@ -6,7 +6,8 @@ import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA = ROOT / 'Leptospirosis clinical data.csv'
+DATA = ROOT / 'data' / 'Leptospirosis clinical data.csv'
+OUTPUT = ROOT / 'outputs'
 SEED = 42
 SYMPTOMS = ['Feverad', 'Headachead', 'Chillsad', 'Rigorsad', 'Musclepainad', 'Muscletendernessad', 'Nauseaad', 'Vomitingadmission', 'Cnsuffusionad', 'Skinrashad', 'Mucosalrashad', 'Prostrationad', 'Diarrhoeaad', 'OliguriaAd', 'Anuriaad', 'Jaundicead', 'Hepatictendernessad', 'Hepatomegalyad', 'Spleenimegalyad', 'Lympadenopathyad', 'Photophobiaad', 'Neckstiffnessad', 'Psychoticsymptomsad', 'Confusionad', 'Coughad', 'Haemoptasisad', 'SOBadd', 'Chestpainad', 'Bleedingad']
 EXPOSURES = ['Marshlandexposure', 'Wetsoilexposure', 'Floodexposure', 'Forestexposure', 'BushesExposure', 'Otheragriexposure', 'Gardeningexposure', 'Otheroutdoorworkexposure', 'Naturalrunningwaterexposure', 'Stagnantwaterexposure', 'Manmaderunningwaterexposure', 'Drainsexposure', 'Otherwaterexposure', 'Paddyfieldexposure', 'CattleHandle', 'BuffaloHandle', 'Goathandle', 'Pighandle', 'Cathandle', 'Doghandle']

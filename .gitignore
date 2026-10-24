@@ -1,16 +1,31 @@
+# Patient data must be obtained separately and must never be committed.
+data/
+**/data/
+*.csv
+*.tsv
+*.xlsx
+*.xls
+*.parquet
+*.feather
+*.sav
+*.dta
+*.zip
+
+# All fitted models, generated reports and run-specific outputs are local.
+outputs/
+artifacts/
+reports/
+*.joblib
+*.pkl
+*.pickle
+*.npz
+*.npy
+*.pdf
+
 .venv/
 __pycache__/
 *.pyc
-leptospirosis_project/results/*.joblib
 tmp/
-leptospirosis_project/results.zip
-
-# Raw patient data and historical patient-containing bundles remain local.
-Leptospirosis clinical data.csv
-leptospirosis_project/results/
-*.joblib
-!artifacts/model.joblib
-
 .env
 .env.*
 !.env.example

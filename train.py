@@ -25,7 +25,7 @@ from sklearn.metrics import (roc_auc_score, average_precision_score, accuracy_sc
 from sklearn.model_selection import train_test_split, StratifiedKFold
 from threadpoolctl import threadpool_limits
 
-from src.data import ROOT, DATA, FEATURES, NUMERIC, NOTICE, SEED, load_data, sha256
+from src.data import ROOT, DATA, OUTPUT, FEATURES, NUMERIC, NOTICE, SEED, load_data, sha256
 from src.models import candidates
 from src.explain import local_shapley
 
@@ -56,7 +56,7 @@ def ranked(frame):
                              ascending=[False, False, True, True, True], kind='stable').reset_index(drop=True)
 
 @threadpool_limits.wrap(limits=1)
-def run(data_path=DATA, output=ROOT):
+def run(data_path=DATA, output=OUTPUT):
     start = time.perf_counter()
     output = Path(output)
     reports, artifacts = output / 'reports', output / 'artifacts'
@@ -156,7 +156,7 @@ def finalize_release(output, data_path, winner, reference, Xtest, ytest, p, prio
     source_hashes = {str(path.relative_to(ROOT)).replace('\\', '/'): sha256(path) for path in source_paths}
     manifest = dict(schema_version=1, created_utc=datetime.now(timezone.utc).isoformat(),
         model=selection['selected_model'], feature_set=selection['feature_set'], source_data_sha256=sha256(data_path), seed=SEED,
-        python=platform.python_version(), packages={pkg: importlib.metadata.version(pkg) for pkg in ['numpy','pandas','scikit-learn','scipy','joblib','xgboost','lightgbm','catboost','streamlit']},
+        python=platform.python_version(), packages={pkg: importlib.metadata.version(pkg) for pkg in ['numpy','pandas','scikit-learn','scipy','joblib','xgboost','lightgbm','catboost']},
         code_sha256=source_hashes, artifacts={str(path.relative_to(output)).replace('\\', '/'): sha256(path) for path in sorted(artifacts.iterdir()) if path.is_file() and path.name != 'manifest.json'},
         report_sha256={str(path.relative_to(output)).replace('\\', '/'): sha256(path) for path in sorted(reports.iterdir()) if path.is_file() and path.name != 'run_history.jsonl'},
         elapsed_seconds=time.perf_counter() - start, notice=NOTICE)
@@ -168,7 +168,7 @@ def finalize_release(output, data_path, winner, reference, Xtest, ytest, p, prio
     return selection
 
 @threadpool_limits.wrap(limits=1)
-def resume_finalization(data_path=DATA, output=ROOT):
+def resume_finalization(data_path=DATA, output=OUTPUT):
     """Rebuild explanations after a reporting failure without repeating model selection."""
     output = Path(output)
     result = json.loads((output / 'reports/test_results.json').read_text())
@@ -223,7 +223,7 @@ def curves_and_plots(reports, leaders, y, p, prior, imp, model, reference):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--data', type=Path, default=DATA)
-    parser.add_argument('--output', type=Path, default=ROOT)
+    parser.add_argument('--output', type=Path, default=OUTPUT)
     parser.add_argument('--finalize', action='store_true', help='Resume explanation/export for an already evaluated local model.')
     args = parser.parse_args()
     (resume_finalization if args.finalize else run)(args.data, args.output)
