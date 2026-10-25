@@ -20,7 +20,6 @@ h1 {letter-spacing:-.04em;color:#123b4a} h2,h3 {color:#164e5b}
 st.caption('APPLIED MACHINE LEARNING  /  SRI LANKAN FEBRILE-PATIENT STUDY')
 st.title('Sri Lanka Leptospirosis ML')
 st.write('Compare the approved models. Inspect the evidence. Explore a prediction.')
-st.warning(NOTICE)
 if not (ROOT / 'artifacts/manifest.json').is_file():
     st.error('The deployment is missing artifacts/manifest.json. Restore the complete saved release and redeploy.')
     st.stop()
@@ -169,3 +168,6 @@ with ops_tab:
     st.write('GitHub Actions checks the data contract, model integrity, explanations and interactive app. Streamlit Community Cloud can host the public demo for free; deployments follow the chosen GitHub branch. Free apps may sleep when idle.')
     st.caption('CI configuration is included. Remote checks and public deployment status must be verified after publishing. Model retraining and promotion are manual; live drift/outcome monitoring is future work.')
     st.markdown('[Dataset attribution: Suneth Agampodi, Mendeley Data v4, CC BY 4.0](https://data.mendeley.com/datasets/zmxmp42g9p/4) · [Free hosting documentation](https://docs.streamlit.io/deploy/streamlit-community-cloud)')
+
+st.divider()
+st.caption(f'**Disclaimer:** {NOTICE}')
