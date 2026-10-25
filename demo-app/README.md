@@ -1,6 +1,6 @@
 # Sri Lanka Leptospirosis demo
 
-The demo lives in `demo-app/` inside the `sri-lanka-leptospirosis-ensemble-ml` repository. It serves the selected Random Forest with engineered features, using a saved model and aggregate or synthetic reports. It requires no source patient CSV or startup training.
+The demo lives in `demo-app/` inside the `sri-lanka-leptospirosis-ensemble-ml` repository. It serves the selected Extra Trees with base features, using a saved model and aggregate or synthetic reports. It requires no source patient CSV or startup training.
 
 ## Streamlit Community Cloud settings
 
@@ -20,7 +20,7 @@ The app dependencies are in `demo-app/requirements.txt`. Community Cloud searche
 2. Commit the updated research files, `demo-app/`, root Streamlit configuration and demo CI workflow. Push to `main`.
 3. Open https://share.streamlit.io/, sign in with GitHub and choose **Create app**.
 4. Choose the repository and settings above, then click **Deploy**.
-5. Verify **Random Forest**, model version **6fe8ec8491c4**, and the default hypothetical example score **0.0726** for Age=35, Feverad=1 and other inputs missing. Request its explanation as well.
+5. Verify **Extra Trees**, model version **503bc9aeb6f8**, and the saved reference example score **0.0772** for Age=35, Fever=Yes (assumed label for code 1) and all other dropdowns set to Not recorded. The live form initially selects Male for sex and Yes for every symptom and exposure, so its initial prediction is a different example. Use **Load reference example**, then **Run inference** and **Explain this prediction** to reproduce that saved example.
 
 Official instructions: [deployment](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/deploy), [file organization](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/file-organization), and [dependency selection](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/app-dependencies). Public deployment has not been verified locally.
 
@@ -56,6 +56,12 @@ python -m streamlit run demo-app/app.py
 
 Run from the repository root to match Community Cloud's working directory. The app resolves its model and reports relative to its own files.
 
+## Input labels and defaults
+
+Every dropdown initially selects source code 1. The app displays Male/Female for sex and Yes/No for symptoms and exposure history, with Not recorded as the missing choice. Sex and exposure labels follow the original study questionnaire, pages 1, 5 and 7. Friendly field names replace CSV abbreviations, while the model still receives its original codes.
+
+For this demo, symptom choices provisionally assume **1=Yes and 2=No**, with user authorization to make a suitable assumption. The app discloses this assumption. It is not a verified CSV-codebook mapping: the supplied admission checklist uses severity levels. Verify the codebook before interpreting symptom values substantively. The model still receives its original source codes. The saved model accepts codes 1 and 2, plus missing values. It does not support code 3 as a distinct category.
+
 ## Validation and updates
 
 Run the demo checks in a separate Python process from the app directory:
@@ -69,7 +75,7 @@ The root `.github/workflows/demo.yml` runs these checks using the app's serving 
 
 ## Model evidence
 
-The benchmark includes Logistic Regression, Decision Tree, Random Forest, SVM, KNN, XGBoost, AdaBoost, Gradient Boosting, LightGBM and CatBoost. Linear Regression is reserved for continuous outcomes. Selection uses mean stratified five-fold development ROC AUC. Random Forest with engineered features scored **0.6028** in development and **0.6328** on the internal holdout. Recall at threshold 0.50 was **0.2021**. The constant prior reference is not a candidate estimator.
+Extra Trees is the focal algorithm. Its random split thresholds distinguish it from Random Forest. Confirm lecture coverage against the course syllabus. The ten comparison classifiers are Logistic Regression, Decision Tree, Random Forest, SVM, KNN, XGBoost, AdaBoost, Gradient Boosting, LightGBM and CatBoost. Linear Regression is reserved for continuous outcomes. Selection uses mean stratified five-fold development ROC AUC. Extra Trees with base features scored **0.6054** in development and **0.6612** on the internal holdout. The full search compares 38 configurations across 11 classifiers. Recall at threshold 0.50 was **0.2021**. The constant prior reference is not a candidate estimator.
 
 Research demonstration only. Final code meanings, measurement units and the 99 missing convention remain provisional. Scores are uncalibrated and the historical holdout is not independent external validation. Use hypothetical inputs. The app does not persist submitted records.
 

@@ -1,4 +1,4 @@
-"""Predeclared classification grids restricted to the project's approved models.
+"""Extra Trees focal study and predeclared comparison classifiers.
 
 Linear regression is approved for regression tasks, but the current target is binary.
 """
@@ -8,13 +8,15 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import AdaBoostClassifier, RandomForestClassifier, GradientBoostingClassifier
+from sklearn.ensemble import AdaBoostClassifier, ExtraTreesClassifier, RandomForestClassifier, GradientBoostingClassifier
 from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
 from catboost import CatBoostClassifier
 from .data import AdmissionFeatures, NUMERIC, CATEGORICAL, DERIVED, SEED
+
+FOCAL_MODEL = 'Extra trees'
 
 def pipeline(estimator, engineered=False):
     num = NUMERIC + (DERIVED if engineered else [])
@@ -31,8 +33,14 @@ def candidates():
     def add(name, family, models):
         for variant in [False, True]:
             for i, model in enumerate(models):
-                result.append(dict(model=name, family=family, feature_set='engineered' if variant else 'base',
+                result.append(dict(model=name, family=family,
+                                   role='Focal algorithm' if name == FOCAL_MODEL else 'Comparison',
+                                   feature_set='engineered' if variant else 'base',
                                    candidate=i, estimator=pipeline(model, variant)))
+    # Extra Trees samples split thresholds; this configuration fits every tree on
+    # the whole fitting fold. It extends the originally supplied taught-model list.
+    add(FOCAL_MODEL, 'Randomized trees', [ExtraTreesClassifier(n_estimators=150, min_samples_leaf=10,
+        max_features='sqrt', bootstrap=False, n_jobs=1, random_state=SEED)])
     add('Logistic regression', 'Linear', [LogisticRegression(C=c, max_iter=2000, random_state=SEED) for c in [0.1, 1]])
     add('Decision tree', 'Tree', [DecisionTreeClassifier(max_depth=d, min_samples_leaf=10, random_state=SEED) for d in [3, 5]])
     add('Random forest', 'Bagging', [RandomForestClassifier(n_estimators=150, min_samples_leaf=l, max_features='sqrt', n_jobs=1, random_state=SEED) for l in [5, 15]])

@@ -35,4 +35,5 @@
 !/src/data.py
 !/src/explain.py
 !/src/runtime.py
+!/src/ui_labels.py
 !/tests/test_deployment.py

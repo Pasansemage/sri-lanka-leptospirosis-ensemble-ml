@@ -7,6 +7,7 @@ import streamlit as st
 from src.data import ROOT, FEATURES, NUMERIC, SYMPTOMS, EXPOSURES, BOUNDS, NOTICE, validate_record
 from src.explain import local_shapley
 from src.runtime import load_release
+from src.ui_labels import CATEGORY_OPTIONS, FIELD_LABELS, option_label
 
 st.set_page_config(page_title='Sri Lanka Leptospirosis ML | Ensemble ML', page_icon='◈', layout='wide')
 st.markdown('''<style>
@@ -55,33 +56,47 @@ predict_tab, comparison_tab, explanation_tab, ops_tab = st.tabs(['Live predictio
 
 with predict_tab:
     st.subheader('Try a hypothetical admission record')
-    st.write('Select source codes exactly as recorded: 1, 2, or Missing. Their clinical meanings have not been verified. Blank numeric inputs remain missing.')
+    st.write('Choose the recorded information for each field. Dropdowns start with Male for sex and Yes for symptoms and exposures. Select Not recorded when information is unavailable. Blank numeric inputs remain missing.')
+    st.caption('Symptom Yes/No labels are a demo assumption pending CSV codebook verification. Sex and exposure labels follow the study questionnaire.')
+    if st.button('Load reference example'):
+        for name in NUMERIC:
+            st.session_state[name] = 35.0 if name == 'Age' else None
+        for name in ['Sex', *SYMPTOMS, *EXPOSURES]:
+            st.session_state[name] = '1' if name == 'Feverad' else 'Missing'
+        st.session_state.pop('prediction', None)
+        st.session_state.pop('local_explanation', None)
     with st.form('inference'):
         values = {}
         columns = st.columns(4)
-        labels = {'Age':'Age (source years)', 'PRad':'Admission pulse (source units)', 'SBPadd':'Admission SBP (source units)', 'DBPadd':'Admission DBP (source units)'}
+        labels = {'Age':'Age (years)', 'PRad':'Pulse rate at admission', 'SBPadd':'Systolic blood pressure', 'DBPadd':'Diastolic blood pressure'}
         for col, name in zip(columns, NUMERIC):
             with col:
+                if name not in st.session_state:
+                    st.session_state[name] = 35.0 if name == 'Age' else None
                 values[name] = st.number_input(labels[name], min_value=float(BOUNDS[name][0]), max_value=float(BOUNDS[name][1]),
-                    value=35.0 if name == 'Age' else None, step=1.0, key=name, help='99 is provisionally treated as missing, consistently with training.')
-        values['Sex'] = st.selectbox('Sex (source code)', ['Missing','1','2'])
+                    value=None, step=1.0, key=name, help='99 is provisionally treated as missing, consistently with training.')
+        def categorical_input(name):
+            return st.selectbox(FIELD_LABELS[name], CATEGORY_OPTIONS, index=0, key=name,
+                                format_func=lambda value: option_label(name, value))
+        values['Sex'] = categorical_input('Sex')
         st.markdown('**Admission symptoms**')
         common = SYMPTOMS[:8]
         for i, name in enumerate(common):
             with columns[i % 4]:
-                values[name] = st.selectbox(name, ['Missing','1','2'], index=1 if name == 'Feverad' else 0, key=name)
+                values[name] = categorical_input(name)
         with st.expander('Additional admission symptoms'):
             extra_cols = st.columns(3)
             for i, name in enumerate(SYMPTOMS[8:]):
-                with extra_cols[i % 3]: values[name] = st.selectbox(name, ['Missing','1','2'], key=name)
+                with extra_cols[i % 3]: values[name] = categorical_input(name)
         with st.expander('Exposure history'):
             exp_cols = st.columns(3)
             for i, name in enumerate(EXPOSURES):
-                with exp_cols[i % 3]: values[name] = st.selectbox(name, ['Missing','1','2'], key=name)
+                with exp_cols[i % 3]: values[name] = categorical_input(name)
         submitted = st.form_submit_button('Run inference', type='primary')
     if submitted:
         try:
-            cleaned = validate_record({k: None if v == 'Missing' else v for k,v in values.items()})
+            cleaned = validate_record({name: None if value == 'Missing' else value
+                                       for name, value in values.items()})
             before = time.perf_counter()
             probability = float(model.predict_proba(cleaned)[0,1])
             st.session_state['prediction'] = dict(row=cleaned, probability=probability, latency_ms=(time.perf_counter()-before)*1000)
@@ -112,13 +127,14 @@ with predict_tab:
 
 with comparison_tab:
     st.subheader('Why this model was chosen')
+    st.caption('Extra Trees is the focal study method. The other ten classifiers provide comparisons on identical development folds.')
     st.write(f"**{selection['selected_model']} ({selection['feature_set']})** had the highest mean development ROC AUC: **{selection['cv_roc_auc']:.4f}**. "
              'All candidates used the same five stratified development folds. Average precision breaks exact AUC ties. The holdout did not select the winner.')
     st.info(selection['validation_status'])
     leaderboard = pd.read_csv(ROOT / 'reports/cv_leaderboard.csv')
     families = sorted(leaderboard.family.unique().tolist())
     family = st.multiselect('Compare model families', families, default=families)
-    st.dataframe(leaderboard.loc[leaderboard.family.isin(family), ['model','family','feature_set','mean_roc_auc','std_roc_auc','mean_average_precision','mean_f1','mean_recall','mean_brier','mean_train_roc_auc','mean_fit_predict_seconds']], hide_index=True)
+    st.dataframe(leaderboard.loc[leaderboard.family.isin(family), ['model','role','family','feature_set','mean_roc_auc','std_roc_auc','mean_average_precision','mean_f1','mean_recall','mean_brier','mean_train_roc_auc','mean_fit_predict_seconds']], hide_index=True)
     st.image(str(ROOT / 'reports/comparison.png'))
     st.caption('Each row is the best development configuration for that model. Fold standard deviations describe variability; they are not confidence intervals or significance tests.')
     st.subheader('Selected model: internal holdout')
@@ -149,7 +165,7 @@ with ops_tab:
     st.subheader('A reproducible release')
     st.write('Train locally → compare development folds → freeze selection → evaluate → explain → checksum the fitted artifact → test → publish → deploy.')
     st.json({k:manifest[k] for k in ['model_version','created_utc','model','feature_set','source_data_sha256','python','packages']})
-    st.write('The app verifies model and report hashes and required serving package versions before loading. The manifest records the training environment. Deployment installs the dependencies needed for the selected Random Forest predictor. The app runs inference without startup training or the original patient CSV.')
+    st.write(f"The app verifies model and report hashes and required serving package versions before loading. The manifest records the training environment. Deployment installs the dependencies needed for the selected {manifest['model']} predictor. The app runs inference without startup training or the original patient CSV.")
     st.write('GitHub Actions checks the data contract, model integrity, explanations and interactive app. Streamlit Community Cloud can host the public demo for free; deployments follow the chosen GitHub branch. Free apps may sleep when idle.')
     st.caption('CI configuration is included. Remote checks and public deployment status must be verified after publishing. Model retraining and promotion are manual; live drift/outcome monitoring is future work.')
     st.markdown('[Dataset attribution: Suneth Agampodi, Mendeley Data v4, CC BY 4.0](https://data.mendeley.com/datasets/zmxmp42g9p/4) · [Free hosting documentation](https://docs.streamlit.io/deploy/streamlit-community-cloud)')

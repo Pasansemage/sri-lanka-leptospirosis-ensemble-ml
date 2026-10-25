@@ -26,7 +26,7 @@ from sklearn.model_selection import train_test_split, StratifiedKFold
 from threadpoolctl import threadpool_limits
 
 from src.data import ROOT, DATA, OUTPUT, FEATURES, NUMERIC, NOTICE, SEED, load_data, sha256
-from src.models import candidates
+from src.models import FOCAL_MODEL, candidates
 from src.explain import local_shapley
 
 def write_json(path, obj):
@@ -107,7 +107,8 @@ def run(data_path=DATA, output=OUTPUT):
         tie_breaker='mean development average precision for exact AUC ties; then deterministic name/feature/candidate order',
         cv_roc_auc=float(best.mean_roc_auc), cv_auc_fold_std=float(best.std_roc_auc),
         cv_average_precision=float(best.mean_average_precision), threshold=.5, test_used_for_selection=False,
-        n_candidates=len(recipes), seed=SEED, outer_folds=5,
+        n_candidates=len(recipes), seed=SEED, outer_folds=5, focal_model=FOCAL_MODEL,
+        study_scope='Extra Trees as the focal extension beyond the supplied model list, with ten comparison classifiers; lecture coverage requires confirmation.',
         validation_status='Historical internal holdout already used in the earlier project; not independent external validation.')
     # Persist the choice before reading any held-out predictions.
     write_json(reports / 'selection.json', selection)
@@ -180,11 +181,17 @@ def write_model_card(reports, selection, result):
 Academic comparison using admission inputs to predict numerical Final code 1 versus code 2.
 {result['notice']}
 
-## Approved scope and selection
+## Focal algorithm and comparison scope
 
-Only Logistic Regression, Decision Tree, Random Forest, SVM, KNN, XGBoost, AdaBoost,
-Gradient Boosting, LightGBM and CatBoost are fitted. Linear Regression is approved
-for continuous-target tasks but is not fitted to this binary target. The prior
+**Extra Trees (Extremely Randomized Trees)** is the focal extension beyond the
+originally supplied model list. It samples candidate split thresholds at random,
+then chooses the best of those candidates. This run uses 150 trees, minimum leaf
+size 10, square-root feature sampling and bootstrap=False. Confirm its lecture
+coverage against the course syllabus before claiming it was not taught.
+
+Logistic Regression, Decision Tree, Random Forest, SVM, KNN, XGBoost, AdaBoost,
+Gradient Boosting, LightGBM and CatBoost provide comparisons. Linear Regression
+is reserved for continuous targets and is not fitted to this binary target. The prior
 reference is a constant development-prevalence score, not a candidate estimator.
 
 {selection['n_candidates']} configurations compare base and engineered features on
@@ -242,8 +249,8 @@ def resume_finalization(data_path=DATA, output=OUTPUT):
             raise ValueError('Saved model differs from the evaluated model.')
     reference = json.loads((output / 'artifacts/reference.json').read_text())
     selection = json.loads((output / 'reports/selection.json').read_text())
-    if selection['selected_model'] not in {spec['model'] for spec in candidates()}:
-        raise ValueError('Saved model is outside the approved classification scope; a full training run is required.')
+    if selection['selected_model'] not in {spec['model'] for spec in candidates()} or selection.get('focal_model') != FOCAL_MODEL:
+        raise ValueError('Saved model belongs to a different study scope; a full training run is required.')
     return finalize_release(output, data_path, winner, reference, X.loc[b], y.loc[b], p,
         np.repeat(float(y.loc[a].mean()), len(b)), selection, time.perf_counter())
 
@@ -264,9 +271,9 @@ def curves_and_plots(reports, leaders, y, p, prior, imp, model, reference):
     plot = leaders.sort_values('mean_roc_auc')
     fig, ax = plt.subplots(figsize=(9, 6))
     colors = {'Linear':'#9ba7b5','Tree':'#677b91','Bagging':'#087f8c',
-              'Kernel':'#7755ab','Neighbors':'#bc658d','Boosting':'#de8b35'}
+              'Kernel':'#7755ab','Neighbors':'#bc658d','Boosting':'#de8b35','Randomized trees':'#164e5b'}
     ax.barh(plot.model, plot.mean_roc_auc, xerr=plot.std_roc_auc, color=[colors[f] for f in plot.family], capsize=3)
-    ax.axvline(.5, linestyle='--', color='gray'); ax.set(xlim=(.35,.8), xlabel='Mean development ROC AUC ± fold SD (not CI)', title='Approved classification model comparison')
+    ax.axvline(.5, linestyle='--', color='gray'); ax.set(xlim=(.35,.8), xlabel='Mean development ROC AUC ± fold SD (not CI)', title='Extra Trees and comparison classifiers')
     fig.tight_layout(); fig.savefig(reports / 'comparison.png', dpi=150); plt.close(fig)
     top = imp.head(15).iloc[::-1]
     fig, ax = plt.subplots(figsize=(9, 6))

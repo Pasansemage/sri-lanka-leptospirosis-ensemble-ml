@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 import pandas as pd
 from src.data import FEATURES, NUMERIC, SYMPTOMS, OUTPUT, AdmissionFeatures, validate_record
-from src.models import pipeline, candidates
+from src.models import FOCAL_MODEL, pipeline, candidates
 from sklearn.linear_model import LogisticRegression
 from src.runtime import load_release
 from src.explain import local_shapley
@@ -36,16 +36,19 @@ class ContractTests(unittest.TestCase):
         self.assertEqual(before[0], 33.5)
         self.assertFalse(set(FEATURES) & {'Final','Serial','Hospital','Platelet2','PCR','MAT'})
 
-    def test_only_approved_classification_models_are_declared(self):
+    def test_focal_extra_trees_and_comparison_models_are_declared(self):
         recipes = candidates()
         expected = {'Logistic regression', 'Decision tree', 'Random forest', 'SVM', 'KNN',
-                    'XGBoost', 'AdaBoost', 'Gradient boosting', 'LightGBM', 'CatBoost'}
+                    'XGBoost', 'AdaBoost', 'Gradient boosting', 'LightGBM', 'CatBoost', 'Extra trees'}
         self.assertEqual({spec['model'] for spec in recipes}, expected)
         for name in expected:
             self.assertEqual({s['feature_set'] for s in recipes if s['model'] == name}, {'base', 'engineered'})
         for spec in recipes:
             self.assertEqual(list(spec['estimator'].named_steps), ['features','prepare','model'])
             self.assertFalse(hasattr(spec['estimator'].named_steps['prepare'], 'transformers_'))
+        focal = [s for s in recipes if s['role'] == 'Focal algorithm']
+        self.assertEqual({s['model'] for s in focal}, {FOCAL_MODEL})
+        self.assertEqual(len(focal), 2)
 
     def test_explanation_reconstructs_synthetic_prediction(self):
         records = pd.concat([validate_record({'Age':25 + i, 'PRad':65 + i, 'Feverad':1 if i % 2 else 2})
@@ -80,6 +83,7 @@ class ReleaseTests(unittest.TestCase):
         selected = json.loads((OUTPUT / 'reports/selection.json').read_text())
         self.assertIn(selected['selected_model'], {spec['model'] for spec in candidates()})
         self.assertEqual(set(frame.model), {spec['model'] for spec in candidates()})
+        self.assertEqual(selected['focal_model'], FOCAL_MODEL)
         self.assertFalse(selected['test_used_for_selection'])
         self.assertEqual(int(frame.iloc[0].spec_id), selected['spec_id'])
         self.assertEqual(frame.iloc[0].model, selected['selected_model'])

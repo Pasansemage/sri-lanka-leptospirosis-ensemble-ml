@@ -1,6 +1,6 @@
 # Sri Lanka Leptospirosis - Ensemble ML Research
 
-Reproducible comparison of the approved classification models using admission features from a Sri Lankan febrile-patient study. This repository contains the research code, modelling notebook, methodology notes, tests and the Streamlit demo under [demo-app/](demo-app/README.md). The demo includes a reviewed fitted model and aggregate or synthetic release reports. Source patient data, generated research outputs and presentations remain outside version control.
+Extra Trees (Extremely Randomized Trees) as the focal algorithm, with ten comparison classifiers using admission features from a Sri Lankan febrile-patient study. This repository contains the research code, modelling notebook, methodology notes, tests and the Streamlit demo under [demo-app/](demo-app/README.md). The demo includes a reviewed fitted model and aggregate or synthetic release reports. Source patient data, generated research outputs and presentations remain outside version control.
 
 ## Deploy the demo from this repository
 
@@ -23,7 +23,7 @@ python -m pip install -r demo-app/requirements.txt
 python -m streamlit run demo-app/app.py
 ```
 
-The deployed release should show Random Forest, version `6fe8ec8491c4`, with default synthetic example score approximately `0.0726`.
+The deployed release should show Extra Trees, version `503bc9aeb6f8`, with saved reference example score approximately `0.0772` (Age=35, Fever=Yes (assumed label for code 1), all other categorical inputs Not recorded). The live form defaults to Male for sex and Yes for symptoms and exposures (source code 1), which is a different example. Symptom Yes/No labels are a provisional demo assumption pending codebook verification.
 
 ## Data source and access
 
@@ -69,19 +69,21 @@ If the kernel starts somewhere unrelated, set `PROJECT_DIR` in the first code ce
 
 ## Methodology and interpretation
 
-The benchmark declares **36 recipes across 10 classification methods**, two feature representations and shared five-fold development splits: **Logistic Regression, Decision Tree, Random Forest, SVM, KNN, XGBoost, AdaBoost, Gradient Boosting, LightGBM and CatBoost**. The approved project list also includes **Linear Regression**, reserved for continuous-target tasks; it is not fitted to the current binary target. No other algorithms or stacking combinations enter selection. A constant development-prevalence score is retained only as an evaluation reference, not as a candidate estimator. SVM uses an RBF kernel and its built-in probability estimation; numeric scaling is fitted within each development fold.
+The updated assignment motivates **Extra Trees as the focal algorithm**, extending the originally supplied model list. The benchmark declares **38 configurations across 11 classifiers** on two feature representations and shared five-fold development splits. Logistic Regression, Decision Tree, Random Forest, SVM, KNN, XGBoost, AdaBoost, Gradient Boosting, LightGBM and CatBoost provide comparisons. Linear Regression remains reserved for continuous targets. No deep learning or stacking is used. The constant development-prevalence score is an evaluation reference rather than a candidate estimator.
+
+[Extra Trees rationale](docs/EXTRA_TREES.md) explains random split thresholds, how the method differs from Random Forest, the declared 150-tree configuration and its limitations. Check actual lecture coverage before claiming the algorithm was not taught. The existing taught-model comparison remains useful evidence rather than being the assignment's focal contribution.
 
 [Feature engineering](docs/FEATURE_ENGINEERING.md) explains each operation, reason, assumption and leakage boundary. Median imputation, missing indicators and encoders are fitted only on training folds. Four derived inputs are tested through development-only ablation.
 
 Selection maximizes **mean development ROC AUC**. Exact ties use development average precision and deterministic ordering. The internal holdout does not select the model, features or threshold. Evaluation additionally reports average precision, accuracy, balanced accuracy, precision, recall, F1, Brier score, log loss and a confusion matrix at threshold 0.50. Global permutation importance and local Monte Carlo Shapley contributions explain the chosen predictor after selection.
 
-The [historical model card](docs/MODEL_CARD.md) records a superseded experiment outside the current approved model scope: Extra Trees with base features, development ROC AUC **0.6054**, internal holdout ROC AUC **0.6612**, and recall **0.2021** at 0.50. These are archived reference results, not results of the restricted benchmark. Retrain to obtain the current winner and metrics. The historical holdout was used in earlier project work; it is internal evaluation, not independent external validation.
+The [current model card](docs/MODEL_CARD.md) describes the regenerated experiment. **Extra Trees with base features** has the highest mean development ROC AUC, **0.6054**, versus Random Forest **0.6028**. Its internal holdout ROC AUC is **0.6612**, average precision **0.5335**, and recall **0.2021** at 0.50. These close CV means do not establish statistical superiority. The historical holdout was already observed and is not independent external validation.
 
 **Research limitations:** numerical source outcome meanings, measurement units and the 99 missing-value convention remain provisional. Do not equate source code 1 with a verified clinical diagnosis. Scores are uncalibrated. Low recall, cohort selection, hospital/time shifts, correlated predictors and selection optimism limit interpretation. Verify the source codebook and obtain independent validation before making stronger substantive claims.
 
 ## Extend the research
 
-Change declared models/grids in `src/models.py`, the admission feature contract in `src/data.py`, or explanations in `src/explain.py`. Keep learned preprocessing inside folds and keep model additions within the approved list. Choose features, hyperparameters and any operating threshold using development data; reserve an independent evaluation set for final assessment. Use a separate output directory for each new experiment and record source version, assumptions and changes alongside the generated manifest.
+Change declared models/grids in `src/models.py`, the admission feature contract in `src/data.py`, or explanations in `src/explain.py`. Keep learned preprocessing inside folds and declare focal methods and comparisons before evaluating the holdout. Choose features, hyperparameters and any operating threshold using development data; reserve an independent evaluation set for final assessment. Use a separate output directory for each new experiment and record source version, assumptions and changes alongside the generated manifest.
 
 ## Checks without patient data
 
@@ -91,6 +93,6 @@ python scripts/check_notebook.py --validate-only
 python -m compileall -q src train.py
 ```
 
-Synthetic-data tests cover input validation, derived-feature handling, preprocessing isolation, the approved model scope, development-only ranking and explanation reconstruction. Three checks of fitted outputs run after local training and otherwise report as skipped. GitHub Actions runs the data-free checks; it does not fetch or publish the dataset. Notebook execution does not save cell outputs unless `--save-outputs` is explicitly requested; clear all outputs before committing.
+Synthetic-data tests cover input validation, derived-feature handling, preprocessing isolation, the focal Extra Trees comparison scope, development-only ranking and explanation reconstruction. Three checks of fitted outputs run after local training and otherwise report as skipped. GitHub Actions runs the data-free checks; it does not fetch or publish the dataset. Notebook execution does not save cell outputs unless `--save-outputs` is explicitly requested; review saved outputs before committing; include only aggregate tables, plots and synthetic examples. The current notebook refreshes these outputs from the local run.
 
 `.gitignore` excludes source data formats, generated research outputs, archives and local environments. Narrow exceptions and the app allowlist include only the reviewed model and aggregate or synthetic release reports under `demo-app/`. Review staged files before publishing, especially when adding new data formats or notebooks.

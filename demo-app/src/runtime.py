@@ -11,7 +11,7 @@ def load_release(root=ROOT):
     for name, expected in {**manifest['artifacts'], **manifest['report_sha256']}.items():
         if sha256(root / name) != expected:
             raise ValueError(f'Artifact integrity check failed: {name}')
-    # This release serves the selected scikit-learn Random Forest pipeline.
+    # This release serves the selected scikit-learn tree-ensemble pipeline.
     # Boosting libraries belong to the separate research benchmark environment.
     for package in ['scikit-learn', 'numpy', 'pandas', 'scipy', 'joblib']:
         try:

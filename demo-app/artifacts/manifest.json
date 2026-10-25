@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "created_utc": "2026-10-25T10:09:28.884035+00:00",
-  "model": "Random forest",
-  "feature_set": "engineered",
+  "created_utc": "2026-10-25T11:47:15.660234+00:00",
+  "model": "Extra trees",
+  "feature_set": "base",
   "source_data_sha256": "8f15e42cf808f6c342b868995633eedac86a7648cc73f553c852191424e7e880",
   "seed": 42,
   "python": "3.12.14",
@@ -17,38 +17,38 @@
     "catboost": "1.2.10"
   },
   "code_sha256": {
-    "train.py": "a979a17e0b4811ac2b9e7248b027c052ec13277299863a9b1183d622b22c0469",
+    "train.py": "2f9be5d3f18a349e7e5258a75e449587cf5b929ceb7ec33b05ab8eb70332fde3",
     "src/__init__.py": "5200f8c06ce49e7041be51167ff7a6001184f28e8cd7080ba1d4b9f9a14efc13",
     "src/data.py": "42130b7f71aa0d47a7bf9f4a80cd621c4ca03268452553cd8dac6e50f797ec84",
     "src/explain.py": "b618512854c9e507a55b61b33232784e81845277a29c1e0b0e0a447fd0488e16",
-    "src/models.py": "985da1e0d8adcf3eee4cd124f627d2bb197d2a1c5bf80b07b6e93e79fbc6edb5",
+    "src/models.py": "cc1b694abef219bd58c0fae3aad353e2d139bc5cba50c74b3ca453a352272aee",
     "src/runtime.py": "46ad0f6450b55fafe95fc04982d217780abef364e1acf0643d1ecab14b5c9dc9",
     "requirements.txt": "d3181c04a288f71ba65e477479b43d6dfa97e4297b1642aba572d397b4a1cbe5"
   },
   "artifacts": {
-    "artifacts/model.joblib": "6fe8ec8491c47d6d6da61cb2db86a0370aebc896cc6cc88bfe182bed7001378a",
+    "artifacts/model.joblib": "503bc9aeb6f8f1e4482054012105a42d51f038adbb5f7f20c2d655eebe5731c0",
     "artifacts/reference.json": "6c3e7272d177443026f9f3e4f54097af5e4610215b3b6785ac64053d7a957b23"
   },
   "report_sha256": {
-    "reports/comparison.png": "bc03ea2637a8fbd0c74146c774a6b5b5e38d79a9746b27eff469285d05b47134",
-    "reports/curves.json": "f585913e9ad42f8756d6c011aac001abce0ae5b0b4a97c5318381e46d17120d5",
-    "reports/cv_candidates.csv": "b2d4ae09f153b6f5d5c348dcb33fd4d9ee90617f015575aa727dc947e2d11304",
-    "reports/cv_folds.csv": "8f7e7b9346125746bb234f8ab2804a05d70520e376bcd9c6cea2d00365b6e976",
-    "reports/cv_leaderboard.csv": "3d00d685a5e5950780059369bcc3462d18cbd4cf66584584e9d64c4f966b5f8b",
-    "reports/evaluation.png": "1e9a33ae854960d824297d7f3a39502388123d89043a6b93e5a6f790508eb36f",
-    "reports/explainability.json": "3761f1863fe0ff5c42a716b617d4b94f3634506c9f5fe33b104c068e36b7f88d",
-    "reports/feature_ablation.csv": "9c06022b8bbc54b48607380012a69a6fa37d2a90871e3e0f78fbf3ffbc77415b",
+    "reports/comparison.png": "db7386d06e27d5dde77d5d9ba3c8a6f30ca94b6c1be7cb392292cbb71383a10f",
+    "reports/curves.json": "cac0620f8343710088a9abdf3e764c9e87fd281d80371de4523edf12b4b256dd",
+    "reports/cv_candidates.csv": "60ed43c32a2a5bd723c79fbd240747e17e55120099358a7ab609fa9ea3a209a4",
+    "reports/cv_folds.csv": "dba956fbd10a7be3f15fc31bc37ad087018ce6425aa3d5e38db89d89ee537271",
+    "reports/cv_leaderboard.csv": "4c6ce60f06c291eac6545f4971f46905ca593e4b25ee84a46093177060f9a712",
+    "reports/evaluation.png": "d6041bbe5c8d2eb745606534d4acb514e8c07edeeb71f50ec29a993174ba95aa",
+    "reports/explainability.json": "1fb4370bb3fbfd2bca507c23795d4e7c319f15e5eaaa2c1e3c544b97e87bc9ea",
+    "reports/feature_ablation.csv": "5906c01200b32dd60114f992109052f121462359cc1e1a633d8cce2e06772178",
     "reports/feature_audit.csv": "91ecbe84e90712bbd41ee1cda1320cd8b9a8ba242f0d59944baf3cc5b928a96a",
-    "reports/FEATURE_ENGINEERING.md": "177136b99f98f052e70629aadbcd24785e4d5e4754406a6ab7e77084ba12eb55",
-    "reports/importance.png": "a05f4f13316e17bc12c2290c92e9c8fff15c4aada86cfbadb28c4d2142f29e08",
-    "reports/MODEL_CARD.md": "2385d52b2a02f42c673e36464fa75f7134c34ac235efffdbd3a54f9214524093",
-    "reports/permutation_importance.csv": "74b7dc3dbe9f5e3a0c2849b066d799223b7dddb34beecc8d58ddb8d3c13f5470",
-    "reports/selection.json": "92d215de1cc0ab03cc15a14f05a9d5928ec2c89a60b578500e2d26ddd813c042",
-    "reports/synthetic_age_response.csv": "ce57fa1c450ad1c6817f0a747dad84db7cee9ca8f85273ad35c4a7805f97238d",
-    "reports/synthetic_local_explanation.csv": "6522053b8c8a53fc71204cef639ef198c2d3e217c0a8a11e9107ba637c8069bf",
-    "reports/test_results.json": "cdf82e5335583055887abe6b795413a64cd07642519b2ca8c48209b89b0dc317"
+    "reports/FEATURE_ENGINEERING.md": "86ce1c65c413237069ad3d72caab38df7fe0780ac1a5ff2e31211d89477cdcd6",
+    "reports/importance.png": "af4907714672cc83c1feb41646bd3747836c4aad5dfee5050dd2c95db288a4ac",
+    "reports/MODEL_CARD.md": "daff0ef973e3f389e905ec42286b814ae7bb45d0659e7ebc2f4db7ffac77b704",
+    "reports/permutation_importance.csv": "724c8748de086900f67314867b5d422dfa769ac0410fa1ef3c6c325b8a714052",
+    "reports/selection.json": "0e340517e3b0ce9dddc0cd892a7f4b9560b7037d68e8f29bf06fc6fae671682f",
+    "reports/synthetic_age_response.csv": "7fc454c4d36398675d6fb3209aecd49b4be36f1bdb1fdcd3d1550c85589869dc",
+    "reports/synthetic_local_explanation.csv": "ce826488ea08c996511b38ea29f450402e9e462138c2e532ebe63abcc825a18e",
+    "reports/test_results.json": "1468ae13235501e89350a586b9d7d6951f23db58d6a00f1aa82f7243fc2fbef3"
   },
-  "elapsed_seconds": 18.28528589999769,
+  "elapsed_seconds": 71.09717159999855,
   "notice": "Research demonstration only. Final code 1 and code 2 have unverified clinical meanings. The 99 missing-value convention and measurement units are provisional. Scores are uncalibrated model outputs, not clinical risks.",
-  "model_version": "6fe8ec8491c4"
+  "model_version": "503bc9aeb6f8"
 }

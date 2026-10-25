@@ -1,5 +1,5 @@
 {
-  "release_model_version": "6fe8ec8491c4",
+  "release_model_version": "503bc9aeb6f8",
   "files": [
     "app.py",
     "artifacts/manifest.json",
@@ -26,7 +26,8 @@
     "src/__init__.py",
     "src/data.py",
     "src/explain.py",
-    "src/runtime.py"
+    "src/runtime.py",
+    "src/ui_labels.py"
   ],
   "allowed_repository_files": [
     ".gitattributes",
@@ -59,9 +60,10 @@
     "src/data.py",
     "src/explain.py",
     "src/runtime.py",
-    "tests/test_deployment.py"
+    "tests/test_deployment.py",
+    "src/ui_labels.py"
   ],
-  "serving_model": "scikit-learn Random Forest",
+  "serving_model": "scikit-learn Extra Trees",
   "streamlit": {
     "entrypoint": "demo-app/app.py",
     "branch": "main",
