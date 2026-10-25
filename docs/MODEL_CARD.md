@@ -1,6 +1,6 @@
 # Historical reference model: Extra Trees
 
-These are recorded results from the original experiment, not automatically updated results for a new research run. Reproduce locally and inspect outputs/reports/ for your own results.
+This archived experiment is **superseded and outside the current approved model scope**. Extra Trees, bagged trees, histogram boosting and stacking are excluded from new training. These recorded metrics must not be presented as results of the restricted benchmark. Reproduce locally and inspect outputs/reports/ for the current approved-model winner and results.
 
 ## Intended use and data contract
 
@@ -10,7 +10,7 @@ The source contains 1734 rows and 806 columns. Eligibility requires Final in {1,
 
 ## Selection evidence
 
-36 declared combinations cover 13 methods, two feature representations and compact hyperparameter grids. Every candidate uses the same five development folds. Stacking has three inner folds with complete preprocessing pipelines. Equal class weights are used across the new benchmark. Highest mean validation ROC AUC selects the complete recipe; exact ties use validation average precision, then deterministic ordering.
+36 declared combinations cover 13 methods, two feature representations and compact hyperparameter grids. Every candidate uses the same five development folds. Stacking has three inner folds with complete preprocessing pipelines. Equal class weights were used across that historical benchmark. Highest mean validation ROC AUC selects the complete recipe; exact ties use validation average precision, then deterministic ordering.
 
 Selected recipe: **Extra trees / base**, candidate 0, mean CV ROC AUC **0.6054**, fold SD **0.0500**, CV average precision **0.4920**. Fold SD is not a confidence interval or significance test. Extra Trees averages 150 randomized trees with min_samples_leaf=10, random_state=42 and bootstrap=False; it belongs in the randomized-averaging comparison but is not literal bootstrap bagging in this configuration.
 

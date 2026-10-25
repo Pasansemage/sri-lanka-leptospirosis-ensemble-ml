@@ -36,14 +36,16 @@ class ContractTests(unittest.TestCase):
         self.assertEqual(before[0], 33.5)
         self.assertFalse(set(FEATURES) & {'Final','Serial','Hospital','Platelet2','PCR','MAT'})
 
-    def test_stack_inner_folds_include_preprocessing(self):
-        stacks = [c for c in candidates() if c['family'] == 'Stacking']
-        self.assertEqual(len(stacks), 4)
-        for spec in stacks:
-            self.assertEqual(spec['estimator'].cv.n_splits, 3)
-            for _, base in spec['estimator'].estimators:
-                self.assertEqual(list(base.named_steps), ['features','prepare','model'])
-                self.assertFalse(hasattr(base.named_steps['prepare'], 'transformers_'))
+    def test_only_approved_classification_models_are_declared(self):
+        recipes = candidates()
+        expected = {'Logistic regression', 'Decision tree', 'Random forest', 'SVM', 'KNN',
+                    'XGBoost', 'AdaBoost', 'Gradient boosting', 'LightGBM', 'CatBoost'}
+        self.assertEqual({spec['model'] for spec in recipes}, expected)
+        for name in expected:
+            self.assertEqual({s['feature_set'] for s in recipes if s['model'] == name}, {'base', 'engineered'})
+        for spec in recipes:
+            self.assertEqual(list(spec['estimator'].named_steps), ['features','prepare','model'])
+            self.assertFalse(hasattr(spec['estimator'].named_steps['prepare'], 'transformers_'))
 
     def test_explanation_reconstructs_synthetic_prediction(self):
         records = pd.concat([validate_record({'Age':25 + i, 'PRad':65 + i, 'Feverad':1 if i % 2 else 2})
@@ -76,6 +78,8 @@ class ReleaseTests(unittest.TestCase):
         from train import ranked
         frame = ranked(pd.read_csv(OUTPUT / 'reports/cv_candidates.csv'))
         selected = json.loads((OUTPUT / 'reports/selection.json').read_text())
+        self.assertIn(selected['selected_model'], {spec['model'] for spec in candidates()})
+        self.assertEqual(set(frame.model), {spec['model'] for spec in candidates()})
         self.assertFalse(selected['test_used_for_selection'])
         self.assertEqual(int(frame.iloc[0].spec_id), selected['spec_id'])
         self.assertEqual(frame.iloc[0].model, selected['selected_model'])

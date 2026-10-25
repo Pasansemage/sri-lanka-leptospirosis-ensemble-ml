@@ -1,0 +1,17 @@
+{
+  "model": "Random forest",
+  "global_method": "10-repeat held-out raw-feature permutation importance (ROC AUC drop)",
+  "local_method": "24-permutation Monte Carlo Shapley baseline-substitution game in code-1 probability units",
+  "reference": "Synthetic reference: development numeric medians and all categorical inputs missing; not an observed patient.",
+  "example": "Synthetic example: Age=35, Feverad=1, all other features missing.",
+  "reference_probability": 0.2460899178204801,
+  "example_probability": 0.07256645674660875,
+  "contribution_sum": -0.17352346107387134,
+  "limitations": [
+    "Correlated predictors can share or mask permutation importance.",
+    "Local contributions depend on the synthetic reference.",
+    "Baseline substitutions may be outside the observed joint distribution.",
+    "Contributions explain the fitted model, not causality or clinical effects.",
+    "Order-sampling standard deviations are not confidence intervals."
+  ]
+}

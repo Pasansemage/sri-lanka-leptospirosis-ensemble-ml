@@ -1,0 +1,89 @@
+{
+  "model": "Random forest",
+  "feature_set": "engineered",
+  "threshold": 0.5,
+  "metrics": {
+    "roc_auc": 0.6328349626221966,
+    "average_precision": 0.5108157932564354,
+    "accuracy": 0.6115702479338843,
+    "balanced_accuracy": 0.5368746405980448,
+    "precision": 0.5,
+    "recall": 0.20212765957446807,
+    "f1": 0.2878787878787879,
+    "brier": 0.2237726819588957,
+    "log_loss": 0.6371637379010131
+  },
+  "baseline_metrics": {
+    "roc_auc": 0.5,
+    "average_precision": 0.3884297520661157,
+    "accuracy": 0.6115702479338843,
+    "balanced_accuracy": 0.5,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "brier": 0.237552409708243,
+    "log_loss": 0.6680412052648701
+  },
+  "confidence_intervals": {
+    "roc_auc": [
+      0.5653087262794709,
+      0.7037234042553192
+    ],
+    "average_precision": [
+      0.44258972218984965,
+      0.6028082470575123
+    ],
+    "accuracy": [
+      0.5661157024793388,
+      0.6570247933884298
+    ],
+    "balanced_accuracy": [
+      0.4899960465784934,
+      0.5866176682001151
+    ],
+    "precision": [
+      0.35892857142857143,
+      0.6571428571428571
+    ],
+    "recall": [
+      0.1276595744680851,
+      0.2872340425531915
+    ],
+    "f1": [
+      0.19047619047619047,
+      0.38462962962962965
+    ],
+    "brier": [
+      0.20972233719819156,
+      0.23687158268509942
+    ],
+    "log_loss": [
+      0.6058895921666089,
+      0.6671799401743754
+    ]
+  },
+  "confidence_interval_method": "1000 fixed-model class-stratified bootstrap samples; does not cover model selection or prevalence uncertainty",
+  "confusion_matrix": [
+    [
+      129,
+      19
+    ],
+    [
+      75,
+      19
+    ]
+  ],
+  "confusion_matrix_order": [
+    "Final code 2 (0)",
+    "Final code 1 (1)"
+  ],
+  "development_n": 964,
+  "test_n": 242,
+  "eligible_n": 1206,
+  "source_n": 1734,
+  "source_columns": 806,
+  "development_code1_prevalence": 0.38900414937759337,
+  "test_code1_prevalence": 0.3884297520661157,
+  "source_sha256": "8f15e42cf808f6c342b868995633eedac86a7648cc73f553c852191424e7e880",
+  "notice": "Research demonstration only. Final code 1 and code 2 have unverified clinical meanings. The 99 missing-value convention and measurement units are provisional. Scores are uncalibrated model outputs, not clinical risks."
+}

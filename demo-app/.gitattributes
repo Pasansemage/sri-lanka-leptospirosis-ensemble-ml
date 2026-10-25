@@ -1,0 +1,13 @@
+* text=auto
+.gitattributes text eol=lf
+.gitignore text eol=lf
+*.toml text eol=lf
+deployment_files.json text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+requirements.txt text eol=lf
+# These release checksums refer to exact bytes across Windows and Linux.
+artifacts/** -text whitespace=cr-at-eol
+reports/** -text whitespace=cr-at-eol
+*.png binary

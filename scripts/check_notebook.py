@@ -1,7 +1,7 @@
 """Validate or execute the notebook's plain-Python cells in one IPython session.
 
 This in-process check needs no separate Jupyter kernel or connection files.
-It intentionally supports this notebook's ordinary Python cells, not kernel magics.
+IPython transforms shell commands and magics before syntax validation.
 Generated outputs are saved only when --save-outputs is explicitly requested.
 """
 from pathlib import Path
@@ -25,8 +25,9 @@ def main():
     nbformat.validate(notebook)
     if args.validate_only:
         cells = [cell for cell in notebook.cells if cell.cell_type == 'code']
+        shell = InteractiveShell.instance()
         for count, cell in enumerate(cells, 1):
-            compile(cell.source, f'{path.name}:cell-{count}', 'exec')
+            compile(shell.input_transformer_manager.transform_cell(cell.source), f'{path.name}:cell-{count}', 'exec')
         print(f'Validated notebook structure and syntax of {len(cells)} code cells without data.')
         return
     os.chdir(path.parent)

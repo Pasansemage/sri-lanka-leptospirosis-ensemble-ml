@@ -1,0 +1,55 @@
+feature,development_missing_fraction,type
+Age,0.008298755186721992,numeric
+PRad,0.3900414937759336,numeric
+SBPadd,0.3879668049792531,numeric
+DBPadd,0.3879668049792531,numeric
+Sex,0.0031120331950207467,categorical source code
+Feverad,0.01037344398340249,categorical source code
+Headachead,0.01037344398340249,categorical source code
+Chillsad,0.012448132780082987,categorical source code
+Rigorsad,0.011410788381742738,categorical source code
+Musclepainad,0.01037344398340249,categorical source code
+Muscletendernessad,0.01037344398340249,categorical source code
+Nauseaad,0.01037344398340249,categorical source code
+Vomitingadmission,0.01037344398340249,categorical source code
+Cnsuffusionad,0.01037344398340249,categorical source code
+Skinrashad,0.01037344398340249,categorical source code
+Mucosalrashad,0.01037344398340249,categorical source code
+Prostrationad,0.01037344398340249,categorical source code
+Diarrhoeaad,0.01037344398340249,categorical source code
+OliguriaAd,0.01037344398340249,categorical source code
+Anuriaad,0.01037344398340249,categorical source code
+Jaundicead,0.01037344398340249,categorical source code
+Hepatictendernessad,0.01037344398340249,categorical source code
+Hepatomegalyad,0.01037344398340249,categorical source code
+Spleenimegalyad,0.01037344398340249,categorical source code
+Lympadenopathyad,0.01037344398340249,categorical source code
+Photophobiaad,0.01037344398340249,categorical source code
+Neckstiffnessad,0.01037344398340249,categorical source code
+Psychoticsymptomsad,0.01037344398340249,categorical source code
+Confusionad,0.01037344398340249,categorical source code
+Coughad,0.01037344398340249,categorical source code
+Haemoptasisad,0.01037344398340249,categorical source code
+SOBadd,0.01037344398340249,categorical source code
+Chestpainad,0.01037344398340249,categorical source code
+Bleedingad,0.035269709543568464,categorical source code
+Marshlandexposure,0.6275933609958506,categorical source code
+Wetsoilexposure,0.6327800829875518,categorical source code
+Floodexposure,0.6161825726141079,categorical source code
+Forestexposure,0.6317427385892116,categorical source code
+BushesExposure,0.6307053941908713,categorical source code
+Otheragriexposure,0.6317427385892116,categorical source code
+Gardeningexposure,0.6307053941908713,categorical source code
+Otheroutdoorworkexposure,0.6338174273858921,categorical source code
+Naturalrunningwaterexposure,0.6286307053941909,categorical source code
+Stagnantwaterexposure,0.6317427385892116,categorical source code
+Manmaderunningwaterexposure,0.6307053941908713,categorical source code
+Drainsexposure,0.6317427385892116,categorical source code
+Otherwaterexposure,0.6338174273858921,categorical source code
+Paddyfieldexposure,0.6307053941908713,categorical source code
+CattleHandle,0.6483402489626556,categorical source code
+BuffaloHandle,0.6462655601659751,categorical source code
+Goathandle,0.6462655601659751,categorical source code
+Pighandle,0.6473029045643154,categorical source code
+Cathandle,0.6504149377593361,categorical source code
+Doghandle,0.6493775933609959,categorical source code

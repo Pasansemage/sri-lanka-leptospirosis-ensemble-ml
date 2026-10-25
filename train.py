@@ -107,7 +107,7 @@ def run(data_path=DATA, output=OUTPUT):
         tie_breaker='mean development average precision for exact AUC ties; then deterministic name/feature/candidate order',
         cv_roc_auc=float(best.mean_roc_auc), cv_auc_fold_std=float(best.std_roc_auc),
         cv_average_precision=float(best.mean_average_precision), threshold=.5, test_used_for_selection=False,
-        n_candidates=len(recipes), seed=SEED, outer_folds=5, stacking_inner_folds=3,
+        n_candidates=len(recipes), seed=SEED, outer_folds=5,
         validation_status='Historical internal holdout already used in the earlier project; not independent external validation.')
     # Persist the choice before reading any held-out predictions.
     write_json(reports / 'selection.json', selection)
@@ -152,6 +152,9 @@ def finalize_release(output, data_path, winner, reference, Xtest, ytest, p, prio
             'Baseline substitutions may be outside the observed joint distribution.', 'Contributions explain the fitted model, not causality or clinical effects.',
             'Order-sampling standard deviations are not confidence intervals.']))
     curves_and_plots(reports, leaders, ytest, p, prior, imp, winner, reference)
+    write_model_card(reports, selection, result)
+    (reports / 'FEATURE_ENGINEERING.md').write_text(
+        (ROOT / 'docs/FEATURE_ENGINEERING.md').read_text(encoding='utf-8'), encoding='utf-8')
     source_paths = [ROOT / 'train.py', *sorted((ROOT / 'src').glob('*.py')), ROOT / 'requirements.txt']
     source_hashes = {str(path.relative_to(ROOT)).replace('\\', '/'): sha256(path) for path in source_paths}
     manifest = dict(schema_version=1, created_utc=datetime.now(timezone.utc).isoformat(),
@@ -166,6 +169,62 @@ def finalize_release(output, data_path, winner, reference, Xtest, ytest, p, prio
         handle.write(json.dumps({k: manifest[k] for k in ['created_utc','model','feature_set','model_version','source_data_sha256','elapsed_seconds']}) + '\n')
     print(json.dumps(dict(selection=selection, test_metrics=result['metrics'], model_version=manifest['model_version']), indent=2), flush=True)
     return selection
+
+def write_model_card(reports, selection, result):
+    """Keep the generated release documentation aligned with the selected run."""
+    interval = result['confidence_intervals']['roc_auc']
+    table = '\n'.join(f"| {key} | {value:.4f} | {result['baseline_metrics'][key]:.4f} |"
+                      for key, value in result['metrics'].items())
+    text = f"""# Selected model: {selection['selected_model']}
+
+Academic comparison using admission inputs to predict numerical Final code 1 versus code 2.
+{result['notice']}
+
+## Approved scope and selection
+
+Only Logistic Regression, Decision Tree, Random Forest, SVM, KNN, XGBoost, AdaBoost,
+Gradient Boosting, LightGBM and CatBoost are fitted. Linear Regression is approved
+for continuous-target tasks but is not fitted to this binary target. The prior
+reference is a constant development-prevalence score, not a candidate estimator.
+
+{selection['n_candidates']} configurations compare base and engineered features on
+the same five stratified development folds. All learned preprocessing is fold-local.
+Selection maximizes mean development ROC AUC, using average precision for exact ties,
+then deterministic ordering. The holdout selects neither model nor features nor threshold.
+
+Selected representation: **{selection['feature_set']}**, candidate {selection['candidate']}.
+Development ROC AUC: **{selection['cv_roc_auc']:.4f}**; fold SD:
+**{selection['cv_auc_fold_std']:.4f}**; average precision: **{selection['cv_average_precision']:.4f}**.
+Fold SD is not a confidence interval. Consult cv_candidates.csv and feature_ablation.csv
+for the full comparison and representation evidence.
+
+## Internal holdout evaluation
+
+Eligible records: {result['eligible_n']}; development: {result['development_n']};
+holdout: {result['test_n']}. Threshold: {selection['threshold']:.2f}.
+
+| Metric | Selected model | Constant prior reference |
+|---|---:|---:|
+{table}
+
+Confusion matrix (actual rows, predicted columns; code 2, code 1):
+**{result['confusion_matrix']}**. ROC AUC 95% fixed-model bootstrap interval:
+**[{interval[0]:.4f}, {interval[1]:.4f}]**. This excludes selection uncertainty.
+
+## Explanations and limitations
+
+Ten-repeat raw-feature permutation importance follows selection. Local explanations
+use 24 random feature orders against a synthetic median/missing reference; reference
+score plus contributions reconstructs the prediction. These are model explanations,
+not causal effects. See explainability.json and the synthetic explanation CSV.
+
+{selection['validation_status']}
+Outcome semantics, units and missing-value codes remain provisional. Low recall,
+uncalibrated scores, cohort selection, correlated predictors, recording practices,
+selection optimism and hospital/time shifts limit interpretation. Independent validation
+is required before stronger claims. Patient data are not included in the saved release.
+"""
+    (reports / 'MODEL_CARD.md').write_text(text, encoding='utf-8')
 
 @threadpool_limits.wrap(limits=1)
 def resume_finalization(data_path=DATA, output=OUTPUT):
@@ -183,6 +242,8 @@ def resume_finalization(data_path=DATA, output=OUTPUT):
             raise ValueError('Saved model differs from the evaluated model.')
     reference = json.loads((output / 'artifacts/reference.json').read_text())
     selection = json.loads((output / 'reports/selection.json').read_text())
+    if selection['selected_model'] not in {spec['model'] for spec in candidates()}:
+        raise ValueError('Saved model is outside the approved classification scope; a full training run is required.')
     return finalize_release(output, data_path, winner, reference, X.loc[b], y.loc[b], p,
         np.repeat(float(y.loc[a].mean()), len(b)), selection, time.perf_counter())
 
@@ -202,9 +263,10 @@ def curves_and_plots(reports, leaders, y, p, prior, imp, model, reference):
     fig.tight_layout(); fig.savefig(reports / 'evaluation.png', dpi=150); plt.close(fig)
     plot = leaders.sort_values('mean_roc_auc')
     fig, ax = plt.subplots(figsize=(9, 6))
-    colors = {'Baseline':'#9ba7b5','Bagging':'#087f8c','Boosting':'#de8b35','Stacking':'#7755ab'}
+    colors = {'Linear':'#9ba7b5','Tree':'#677b91','Bagging':'#087f8c',
+              'Kernel':'#7755ab','Neighbors':'#bc658d','Boosting':'#de8b35'}
     ax.barh(plot.model, plot.mean_roc_auc, xerr=plot.std_roc_auc, color=[colors[f] for f in plot.family], capsize=3)
-    ax.axvline(.5, linestyle='--', color='gray'); ax.set(xlim=(.35,.8), xlabel='Mean development ROC AUC ± fold SD (not CI)', title='Predeclared ensemble comparison')
+    ax.axvline(.5, linestyle='--', color='gray'); ax.set(xlim=(.35,.8), xlabel='Mean development ROC AUC ± fold SD (not CI)', title='Approved classification model comparison')
     fig.tight_layout(); fig.savefig(reports / 'comparison.png', dpi=150); plt.close(fig)
     top = imp.head(15).iloc[::-1]
     fig, ax = plt.subplots(figsize=(9, 6))

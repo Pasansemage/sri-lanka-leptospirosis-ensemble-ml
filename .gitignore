@@ -37,3 +37,17 @@ htmlcov/
 *.log
 .DS_Store
 Thumbs.db
+
+# Reviewed serving release for the demo inside this repository.
+# demo-app/.gitignore further restricts this folder to its declared app files.
+!/demo-app/artifacts/
+!/demo-app/artifacts/model.joblib
+!/demo-app/reports/
+!/demo-app/reports/cv_candidates.csv
+!/demo-app/reports/cv_folds.csv
+!/demo-app/reports/cv_leaderboard.csv
+!/demo-app/reports/feature_ablation.csv
+!/demo-app/reports/feature_audit.csv
+!/demo-app/reports/permutation_importance.csv
+!/demo-app/reports/synthetic_age_response.csv
+!/demo-app/reports/synthetic_local_explanation.csv
